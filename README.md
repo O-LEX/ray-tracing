@@ -1,4 +1,7 @@
 # ray-tracing
+
+https://github.com/O-LEX/ray-tracing/assets/55784735/8480a5f3-6cf4-454b-b46e-61d30e34979d
+
 Windowsを想定しています。
 vcpkgをC:/dev/にインストールしてください。公式リポジトリに説明があります。
 vcpkgを使ってglm,glfw3をインストールしてください。
