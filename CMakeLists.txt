@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)  
 
 set(SOURCES
-    ${PROJECT_SOURCE_DIR}/src/main5.cpp
+    ${PROJECT_SOURCE_DIR}/src/main.cpp
     ${PROJECT_SOURCE_DIR}/src/camera.cpp
     ${PROJECT_SOURCE_DIR}/src/model.cpp
     ${PROJECT_SOURCE_DIR}/src/shader.cpp
