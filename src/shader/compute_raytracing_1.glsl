@@ -41,7 +41,7 @@ uniform float fov;
 uniform int numLights;
 
 const float BIAS = 0.001;
-const int MAX_BOUNCES = 5;
+const int MAX_BOUNCES = 1;
 const float INF = 1e30;
 
 vec3 rayDirection(float fov, float aspectRatio, vec2 uv) {
