@@ -73,6 +73,9 @@ int main() {
     Cshader cshader(SOURCE_DIR "/src/shader/compute_raytracing_1.glsl");
 
     Shader shader(SOURCE_DIR "/src/shader/simple_vertex.glsl", SOURCE_DIR "/src/shader/simple_fragment.glsl");
+
+    // quad
+    // is used for to show the image computed by compute_shader
     float quadVertices[] = {
         // positions        // texture Coords
         -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
@@ -96,6 +99,7 @@ int main() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
+    // framebuffer for compute_shader
     GLuint framebufferTexture = createTexture(SCR_WIDTH, SCR_HEIGHT);
     GLuint framebuffer = createFramebuffer(framebufferTexture);
 
