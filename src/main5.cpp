@@ -10,6 +10,7 @@
 #include "cshader.h"
 #include "util.h"
 #include "bvh.h"
+#include "quad.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -70,34 +71,11 @@ int main() {
     GLuint nodeSSBO = createSSBO(nodes.data(), nodes.size() * sizeof(BVHNode), 1);
     GLuint lightSSBO = createSSBO(lights.data(), lights.size() * sizeof(Light), 2);
 
+    // compute_shader
     Cshader cshader(SOURCE_DIR "/src/shader/compute_raytracing_1.glsl");
 
-    Shader shader(SOURCE_DIR "/src/shader/simple_vertex.glsl", SOURCE_DIR "/src/shader/simple_fragment.glsl");
-
-    // quad
-    // is used for to show the image computed by compute_shader
-    float quadVertices[] = {
-        // positions        // texture Coords
-        -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
-        -1.0f, -1.0f, 0.0f,  0.0f, 0.0f,
-         1.0f, -1.0f, 0.0f,  1.0f, 0.0f,
-
-        -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
-         1.0f, -1.0f, 0.0f,  1.0f, 0.0f,
-         1.0f,  1.0f, 0.0f,  1.0f, 1.0f
-    };
-    GLuint quadVAO, quadVBO;
-    glGenVertexArrays(1, &quadVAO);
-    glGenBuffers(1, &quadVBO);
-    glBindVertexArray(quadVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    // quad is used for to show the image computed by compute_shader
+    Quad quad;
 
     // framebuffer for compute_shader
     GLuint framebufferTexture = createTexture(SCR_WIDTH, SCR_HEIGHT);
@@ -129,12 +107,11 @@ int main() {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        shader.use();
-        glBindVertexArray(quadVAO);
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, framebufferTexture);
-        shader.setInt("screenTexture", 0);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        quad.draw();
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
@@ -142,9 +119,10 @@ int main() {
     // Cleanup
     glDeleteTextures(1, &framebufferTexture);
     glDeleteFramebuffers(1, &framebuffer);
-    glDeleteVertexArrays(1, &quadVAO);
-    glDeleteBuffers(1, &quadVBO);
     glDeleteBuffers(1, &triangleSSBO);
+    glDeleteBuffers(1, &nodeSSBO);
+    glDeleteBuffers(1, &lightSSBO);
+    quad.cleanup();
     cleanup(window);
     return 0;
 }
