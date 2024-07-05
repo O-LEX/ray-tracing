@@ -65,7 +65,7 @@ int main() {
 
     // Load shaders and model
     Shader shader(SOURCE_DIR "/src/shader/vertex_shader.glsl", SOURCE_DIR "/src/shader/fragment_shader.glsl");
-    Model model(SOURCE_DIR "/asset/furina/scene.gltf");
+    Model model(SOURCE_DIR "/asset/topaz/scene.gltf");
 
     // Main render loop
     while (!glfwWindowShouldClose(window)) {
