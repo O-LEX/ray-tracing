@@ -72,7 +72,7 @@ int main() {
     GLuint lightSSBO = createSSBO(lights.data(), lights.size() * sizeof(Light), 2);
 
     // compute_shader
-    Cshader cshader(SOURCE_DIR "/src/shader/compute_raytracing_1.glsl");
+    Cshader cshader(SOURCE_DIR "/src/shader/tiny_compute.glsl");
 
     // quad is used for to show the image computed by compute_shader
     Quad quad;

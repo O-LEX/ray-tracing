@@ -6,17 +6,7 @@ Windowsを想定しています。
 vcpkgをC:/dev/にインストールしてください。公式リポジトリに説明があります。
 vcpkgを使ってglm,glfw3をインストールしてください。
 
-externalフォルダを作りgladとtinygltfのjson.hpp,stb_image_write.h,stb_image.h,tiny_gltf.hを入れてください。
-
-external/glad
-external/tinygltf/json.hpp
-external/tinygltf/stb_image_write.h
-external/tinygltf/stb_image.h
-external/tinygltf/tiny_gltf.h
-
-のようになります。
-
-macでもbrewを使ってglmとglfw3をインストールすることでmain1とmain2は動作させることができます。macのopenglのバージョンが古いために。main3,main4,main5はmacでは動作しません。
+macでもbrewを使ってglmとglfw3をインストールすることでmain1とmain2は動作させることができます。
 
 assetフォルダを作りそこにgltfファイルを入れ、mainの中で読み込むファイル名を指定してください。model()の中にパスを指定してください。読み込む際にテクスチャがあることを前提としているのでテクスチャがない場合は読み込めません。
 
