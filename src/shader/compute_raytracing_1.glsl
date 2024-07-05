@@ -40,6 +40,10 @@ uniform float aspectRatio;
 uniform float fov;
 uniform int numLights;
 
+const float BIAS = 0.001;
+const int MAX_BOUNCES = 5;
+const float INF = 1e30;
+
 vec3 rayDirection(float fov, float aspectRatio, vec2 uv) {
     float tanFov = tan(radians(fov) / 2.0);
     return normalize(uv.x * cameraRight * aspectRatio * tanFov + uv.y * cameraUp * tanFov + cameraFront);
@@ -157,11 +161,11 @@ void main() {
     vec3 origin = cameraPosition;
 
     vec3 color = vec3(0.0);
+    vec3 throughput = vec3(1.0);
 
-    int maxBounces = 1;  // とりあえず1回のバウンスで終了
     int currentBounce = 0;
 
-    while (currentBounce < maxBounces) {
+    while (currentBounce < MAX_BOUNCES) {
         vec3 hitPoint;
         vec3 normal;
         float tMin;
@@ -169,11 +173,17 @@ void main() {
         if (traverseBVH(origin, dir, hitPoint, normal, tMin)) {
             // ヒットポイントからのライティング計算
             vec3 viewDir = normalize(-dir);
-            color += computeLighting(hitPoint, normal, viewDir);
+            vec3 lighting = computeLighting(hitPoint, normal, viewDir);
 
-            // 次のバウンスのためにoriginとdirを更新（現在は仮の更新）
-            origin = hitPoint + normal * 0.001; // ヒットポイントを微小オフセット
+            // 現在のバウンスの色を累積
+            color += throughput * lighting;
+
+            // 次のバウンスのためにoriginとdirを更新
+            origin = hitPoint + normal * BIAS; // ヒットポイントを微小オフセット
             dir = reflect(dir, normal); // レイの反射方向を更新
+
+            // 色の減衰
+            throughput *= 0.5;
         } else {
             // 交差しない場合、ループを抜ける
             break;
