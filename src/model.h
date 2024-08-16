@@ -1,5 +1,4 @@
-#ifndef MODEL_H
-#define MODEL_H
+#pragma once
 
 #include <glad/gl.h>
 #include <glm/glm.hpp>
@@ -32,5 +31,3 @@ private:
     Mesh processMesh(tinygltf::Model &model, tinygltf::Mesh &mesh);
     GLuint loadTexture(tinygltf::Model &model, int texIndex);
 };
-
-#endif
