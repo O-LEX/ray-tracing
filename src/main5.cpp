@@ -56,6 +56,16 @@ int main() {
     // Load shaders and model
     Shader shader(SOURCE_DIR "/src/shader/vertex_shader1.glsl", SOURCE_DIR "/src/shader/fragment_shader1.glsl");
 
+    tinygltf::Model model;
+    tinygltf::TinyGLTF loader;
+    std::string err, warn;
+
+    bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, "path/to/model.gltf");
+
+    if (!ret) {
+        std::cerr << "Failed to load .gltf file" << std::endl;
+        return -1;
+    }
 
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = glfwGetTime();

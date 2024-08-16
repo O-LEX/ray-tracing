@@ -5,3 +5,6 @@
 #include "load.h"
 #include <iostream>
 
+Model::Model(const std::string &path) {
+    loadModel(path);
+}
