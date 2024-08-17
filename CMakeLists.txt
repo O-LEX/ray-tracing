@@ -17,7 +17,7 @@ set(SOURCES
     # ${PROJECT_SOURCE_DIR}/src/util.cpp
     # ${PROJECT_SOURCE_DIR}/src/bvh.cpp
     # ${PROJECT_SOURCE_DIR}/src/quad.cpp
-    # ${PROJECT_SOURCE_DIR}/src/load.cpp
+    ${PROJECT_SOURCE_DIR}/src/load.cpp
     # ${PROJECT_SOURCE_DIR}/external/glad/src/gl.c
 )
 

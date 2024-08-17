@@ -7,31 +7,22 @@
 
 class Model {
 public:
-    struct Vertex {
+    struct vertex {
         glm::vec3 position;
-        glm::vec3 normal;
         glm::vec2 texCoord;
     };
 
-    struct Material {
-        glm::vec4 baseColor;
-        float metallic;
-        float roughness;
-    };
-
-    struct Primitive {
-        std::vector<Vertex> vertices;
+    struct primitive {
+        std::vector<vertex> vertices;
         std::vector<uint32_t> indices;
-        Material material;
-    };
-
-    struct Mesh {
-        std::vector<Primitive> primitives;
     };
 
     Model(const std::string &path);
 
 private:
-    std::vector<Mesh> meshes;
-
+    void loadModel(const std::string& path);
+    void processScene(tinygltf::Model& model, const tinygltf::Scene& scene);
+    void processNode(tinygltf::Model& model, const tinygltf::Node& node);
+    void processMesh(tinygltf::Model& model, const tinygltf::Mesh& mesh);
+    void processPrimitive(tinygltf::Model& model, const tinygltf::Primitive& primitive);
 };
