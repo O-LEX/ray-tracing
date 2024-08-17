@@ -43,6 +43,42 @@ void Model::processPrimitive(tinygltf::Model& model, const tinygltf::Primitive& 
             idxBuffer.data.data() + idxView.byteOffset + idxAccessor.byteOffset);
         p.indices = std::vector<uint32_t>(indices, indices + idxAccessor.count);
     }
+
+    if (primitive.material >= 0) {
+        const tinygltf::Material& mat = model.materials[primitive.material];
+        if (mat.pbrMetallicRoughness.baseColorTexture.index >= 0) {
+            p.textureID = loadTexture(model, mat.pbrMetallicRoughness.baseColorTexture.index);
+        }
+    }
+
+    primitives.push_back(p);
+}
+
+GLuint Model::loadTexture(tinygltf::Model& model, int texIndex) {
+    if (texIndex < 0) return 0;
+
+    if (textureCache.find(texIndex) != textureCache.end()) {
+        return textureCache[texIndex];
+    }
+
+    GLuint textureID;
+    glGenTextures(1, &textureID);
+
+    const tinygltf::Texture& tex = model.textures[texIndex];
+    const tinygltf::Image& image = model.images[tex.source];
+
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width, image.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &image.image[0]);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    textureCache[texIndex] = textureID;
+
+    return textureID;
 }
 
 void Model::processMesh(tinygltf::Model& model, const tinygltf::Mesh& mesh) {

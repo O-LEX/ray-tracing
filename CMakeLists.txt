@@ -9,16 +9,16 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)  
 
 set(SOURCES
-    ${PROJECT_SOURCE_DIR}/src/main6.cpp
-    # ${PROJECT_SOURCE_DIR}/src/camera.cpp
-    # # ${PROJECT_SOURCE_DIR}/src/model.cpp
-    # ${PROJECT_SOURCE_DIR}/src/shader.cpp
-    # ${PROJECT_SOURCE_DIR}/src/cshader.cpp
-    # ${PROJECT_SOURCE_DIR}/src/util.cpp
-    # ${PROJECT_SOURCE_DIR}/src/bvh.cpp
-    # ${PROJECT_SOURCE_DIR}/src/quad.cpp
+    ${PROJECT_SOURCE_DIR}/src/main5.cpp
+    ${PROJECT_SOURCE_DIR}/src/camera.cpp
+    # ${PROJECT_SOURCE_DIR}/src/model.cpp
+    ${PROJECT_SOURCE_DIR}/src/shader.cpp
+    ${PROJECT_SOURCE_DIR}/src/cshader.cpp
+    ${PROJECT_SOURCE_DIR}/src/util.cpp
+    ${PROJECT_SOURCE_DIR}/src/bvh.cpp
+    ${PROJECT_SOURCE_DIR}/src/quad.cpp
     ${PROJECT_SOURCE_DIR}/src/load.cpp
-    # ${PROJECT_SOURCE_DIR}/external/glad/src/gl.c
+    ${PROJECT_SOURCE_DIR}/external/glad/src/gl.c
 )
 
 find_package(OpenGL REQUIRED)
