@@ -5,20 +5,20 @@
 #include "load.h"
 #include <iostream>
 
-Model::Model(const std::string &path) {
+Model::Model(const std::string& path) {
     loadModel(path);
 }
 
-void Model::processPrimitive(tinygltf::Model& model, const tinygltf::Primitive& primitive) {
-    Model::primitive p;
+void Model::processPrimitive(tinygltf::Model& model, const tinygltf::Primitive& prim) {
+    primitive p;
 
     // Positions
-    const tinygltf::Accessor& posAccessor = model.accessors[primitive.attributes.at("POSITION")];
+    const tinygltf::Accessor& posAccessor = model.accessors[prim.attributes.at("POSITION")];
     const tinygltf::BufferView& posView = model.bufferViews[posAccessor.bufferView];
     const tinygltf::Buffer& posBuffer = model.buffers[posView.buffer];
 
     // Texture Coordinates
-    const tinygltf::Accessor& texAccessor = model.accessors[primitive.attributes.at("TEXCOORD_0")];
+    const tinygltf::Accessor& texAccessor = model.accessors[prim.attributes.at("TEXCOORD_0")];
     const tinygltf::BufferView& texView = model.bufferViews[texAccessor.bufferView];
     const tinygltf::Buffer& texBuffer = model.buffers[texView.buffer];
 
@@ -34,8 +34,8 @@ void Model::processPrimitive(tinygltf::Model& model, const tinygltf::Primitive& 
         p.vertices.push_back(v);
     }
 
-    if (primitive.indices >= 0) {
-        const tinygltf::Accessor& idxAccessor = model.accessors[primitive.indices];
+    if (prim.indices >= 0) {
+        const tinygltf::Accessor& idxAccessor = model.accessors[prim.indices];
         const tinygltf::BufferView& idxView = model.bufferViews[idxAccessor.bufferView];
         const tinygltf::Buffer& idxBuffer = model.buffers[idxView.buffer];
 
@@ -44,10 +44,10 @@ void Model::processPrimitive(tinygltf::Model& model, const tinygltf::Primitive& 
         p.indices = std::vector<uint32_t>(indices, indices + idxAccessor.count);
     }
 
-    if (primitive.material >= 0) {
-        const tinygltf::Material& mat = model.materials[primitive.material];
+    if (prim.material >= 0) {
+        const tinygltf::Material& mat = model.materials[prim.material];
         if (mat.pbrMetallicRoughness.baseColorTexture.index >= 0) {
-            p.textureID = loadTexture(model, mat.pbrMetallicRoughness.baseColorTexture.index);
+            p.textureIndex = mat.pbrMetallicRoughness.baseColorTexture.index;
         }
     }
 
@@ -126,4 +126,78 @@ void Model::loadModel(const std::string& path) {
     for (const auto& scene : model.scenes) {
         processScene(model, scene);
     }
+}
+
+std::vector<Triangle> extractTriangles(const std::vector<primitive>& primitives) {
+    std::vector<Triangle> triangles;
+    for (const auto& prim : primitives) {
+        for (size_t i = 0; i < prim.indices.size(); i += 3) {
+            Triangle tri;
+            tri.v0 = prim.vertices[prim.indices[i]].position;
+            tri.v1 = prim.vertices[prim.indices[i+1]].position;
+            tri.v2 = prim.vertices[prim.indices[i+2]].position;
+            tri.t0 = prim.vertices[prim.indices[i]].texCoord;
+            tri.t1 = prim.vertices[prim.indices[i+1]].texCoord;
+            tri.t2 = prim.vertices[prim.indices[i+2]].texCoord;
+            tri.textureIndex = prim.textureIndex;
+            triangles.push_back(tri);
+        }
+    }
+    return triangles;
+}
+
+BVHNode* buildBVH(std::vector<Triangle>& triangles, int start, int end) {
+    if (start >= end) return nullptr;
+
+    BVHNode* node = new BVHNode();
+
+    glm::vec3 minBound(FLT_MAX), maxBound(-FLT_MAX);
+    for (int i = start; i < end; ++i) {
+        const Triangle& tri = triangles[i];
+        for (const glm::vec3& v : {tri.v0, tri.v1, tri.v2}) {
+            minBound = glm::min(minBound, v);
+            maxBound = glm::max(maxBound, v);
+        }
+    }
+    node->bounds[0] = minBound;
+    node->bounds[1] = maxBound;
+
+    if (end - start == 1) {
+        node->triangleIndex = start;
+        node->left = node->right = nullptr;
+        return node;
+    }
+
+    int axis = 0;
+    glm::vec3 extent = maxBound - minBound;
+    if (extent.y > extent.x && extent.y > extent.z) {
+        axis = 1;
+    } else if (extent.z > extent.x) {
+        axis = 2;
+    }
+
+    int mid = (start + end) / 2;
+    std::nth_element(triangles.begin() + start, triangles.begin() + mid, triangles.begin() + end,
+                     [axis](const Triangle& a, const Triangle& b) {
+                         return (a.v0[axis] + a.v1[axis] + a.v2[axis]) <
+                                (b.v0[axis] + b.v1[axis] + b.v2[axis]);
+                     });
+
+    node->left = buildBVH(triangles, start, mid);
+    node->right = buildBVH(triangles, mid, end);
+    node->triangleIndex = -1;
+
+    return node;
+}
+
+BVHNode* generateBVH(const std::vector<primitive>& primitives) {
+    std::vector<Triangle> triangles = extractTriangles(primitives);
+    return buildBVH(triangles, 0, triangles.size());
+}
+
+void freeBVH(BVHNode* node) {
+    if (!node) return;
+    freeBVH(node->left);
+    freeBVH(node->right);
+    delete node;
 }
